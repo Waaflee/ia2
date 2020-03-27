@@ -11,6 +11,7 @@ autopep8 = "*"
 rope = "*"
 matplotlib = "*"
 numba = "*"
+pyyaml = "*"
 
 [requires]
 python_version = "3.8"

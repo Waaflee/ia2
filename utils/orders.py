@@ -1,17 +1,25 @@
-#!/usr/bin/python
-from utils.store_generator import generate_store
+# !/usr/bin/python
 import random
+
+
+def calculate_rows(size):
+    acc = 6
+    if size == 1:
+        return acc
+    for i in range(size-1):
+        acc *= 2
+        acc -= 1
+    return acc
 
 
 def order_generator(order_amount=24, store_size=2, seed=True):
     if seed:
         random.seed()
     orders = set()
-    store = generate_store(store_size)
-    columns = store[0].size
-    rows = int(store.size / columns)
-    v_free = [i for i in range(0, columns, 3)]
-    h_free = [i for i in range(0, rows, 5)]
+    columns = 1 + 3*store_size
+    rows = calculate_rows(store_size)
+    v_free = set([i for i in range(0, columns, 3)])
+    h_free = set([i for i in range(0, rows, 5)])
 
     for i in range(order_amount):
         x, y = 0, 0

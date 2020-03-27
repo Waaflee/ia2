@@ -9,14 +9,17 @@ from algorithms.astar import Astar
 # from functools import reduce
 
 
-def compute_distance(path):
+def compute_distance(path, fast=False):
     acc = 0
     A = Astar(store)
-    for i in range(1, len(path)):
+    if (fast):
+        for i in range(1, len(path)):
+            # Using Manhattan for distance finding (Faster, valid only for this particular scenario)
+            acc += distance(path[i - 1], path[i])
+    else:
         # Using A* algorithm for distance finding (Accurate and generic, valid for several scenarios. Slower)
-        acc += len(A.astar(path[i - 1], path[i]))
-        # Using Manhattan for distance finding (Faster, valid only for this particular scenario)
-        # acc += distance(path[i - 1], path[i])
+        for i in range(1, len(path)):
+            acc += len(A.astar(path[i - 1], path[i]))
     # return reduce((lambda x, y: distance(x, y)), path)
     return acc
 
