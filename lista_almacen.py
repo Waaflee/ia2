@@ -50,8 +50,8 @@ class ListOrderer():
                 b = random.randrange(len(self.list) - 1)
             swapped_list[a], swapped_list[b] = swapped_list[b], swapped_list[a]
             swapped_lists.append(swapped_list)
-        return swapped_lists
-        # return list(itertools.permutations(self.list)) #coorect but inefficient, WIP to develop more cautious alternative.
+        return swapped_lists  # incomplete neighbors list
+        # return list(itertools.permutations(self.list)) #correct but inefficient, WIP to develop more cautious alternative.
 
     def pick(self, list):
         iterations = 0

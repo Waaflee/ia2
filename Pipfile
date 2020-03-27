@@ -10,6 +10,7 @@ numpy = "*"
 autopep8 = "*"
 rope = "*"
 matplotlib = "*"
+numba = "*"
 
 [requires]
 python_version = "3.8"

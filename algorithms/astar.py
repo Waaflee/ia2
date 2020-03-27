@@ -55,22 +55,22 @@ class Astar():
         childs = []
         for i in [(x-1, y), (x, y - 1), (x, y + 1), (x+1, y)]:
             point = i
-            try:
-                if (point[0] >= 0 and point[0] < self.maze.shape[0]) and (point[1] >= 0 and point[1] < self.maze.shape[1]):
-                    if self.maze[point[0]][point[1]] == 0:
+            # try:
+            if (point[0] >= 0 and point[0] < self.maze.shape[0]) and (point[1] >= 0 and point[1] < self.maze.shape[1]):
+                if self.maze[point[0]][point[1]] == 0:
+                    g = distance(point, self.start)
+                    h = distance(point, self.end)
+                    f = g + h
+                    child = Node(point, f, g, current)
+                    childs.append(child)
+                elif self.maze[point[0]][point[1]] == 1:
+                    if point == self.end:
                         g = distance(point, self.start)
                         h = distance(point, self.end)
                         f = g + h
-                        child = Node(point, f, g, current)
-                        childs.append(child)
-                    elif self.maze[point[0]][point[1]] == 1:
-                        if point == self.end:
-                            g = distance(point, self.start)
-                            h = distance(point, self.end)
-                            f = g + h
-                            return [Node(point, f, g, current)]
-                    else:
-                        continue
-            except IndexError as e:
-                print("caught index error")
+                        return [Node(point, f, g, current)]
+                else:
+                    continue
+            # except IndexError as e:
+            #     print("caught index error")
         return childs
