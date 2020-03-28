@@ -1,6 +1,6 @@
 #!/usr/bin/python
 from utils.store_generator import generate_store
-from utils.orders import order_generator
+from utils.orders_deprecated import order_generator
 from algorithms.astar import Astar
 from algorithms.simulated_annealing_deprecated import SimulatedAnnealing
 

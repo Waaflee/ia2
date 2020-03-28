@@ -1,4 +1,4 @@
-from utils.orders import Order
+from utils.orders import *
 from algorithms.simulated_annealing import ListOrderer, compute_distance, round_trip
 from utils.store_generator import generate_indexed_store
 import random
@@ -7,34 +7,6 @@ from functools import reduce
 import numpy as np
 
 random.seed()
-
-
-def create_order(store, size, uniques=False):
-    if uniques:
-        order = set()
-        for i in range(size):
-            order.add(random.randint(1, store[2::].max()))
-        return list(order)
-    else:
-        order = []
-        for i in range(size):
-            order.append(random.randint(1, store[2::].max()))
-        return order
-
-
-def array_to_point(array):
-    print(array)
-    x = array[0][0]
-    y = array[1][0]
-    return (x, y)
-
-
-def order_to_points(order, store):
-    return [array_to_point(np.where(store == i)) for i in order]
-
-
-def points_to_order(points, store):
-    return [store[i[0]][i[1]] for i in points]
 
 
 class GeneticStore():
@@ -66,7 +38,12 @@ orders = [create_order(store, random.randint(1, max_order_size))
 a = order_to_points(orders[0], store)
 b = points_to_order(order_to_points(orders[0], store), store)
 
-c = "as"
+# print(orders[0])
+
+
+a = compute_distance(order_to_points([4, 4, 7, 4, 3], store))
+b = compute_distance(order_to_points([7, 4, 4, 4, 3], store))
+print(a, b)
 # orders = [Order(random.randrange(
 #     1, max_order_size), max_stock, store) for i in range(order_amount)]
 

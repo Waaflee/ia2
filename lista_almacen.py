@@ -1,6 +1,6 @@
 #!/usr/bin/python
 from algorithms.simulated_annealing import ListOrderer, compute_distance
-from utils.orders import order_generator
+from utils.orders_deprecated import order_generator
 from utils.store_generator import generate_store
 
 order_amount = 8
