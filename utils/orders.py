@@ -1,6 +1,8 @@
 # !/usr/bin/python
 import random
 from utils.store_generator import extract_from_set
+from algorithms.simulated_annealing import ListOrderer, compute_distance, round_trip
+import numpy as np
 
 
 def calculate_rows(size):
@@ -42,6 +44,32 @@ class Product():
         return f"(index: {self.index}, amount: {self.amount})"
 
 
-def indexed_order_generator(amount, stock, store):
-    indexes = [i for i in range(1, store[2::].max())]
-    return [Product(extract_from_set(indexes), random.randrange(1, stock)) for i in range(amount)]
+class Order():
+    def __init__(self, amount, stock, store):
+        self.list = self._indexed_order_generator(amount, stock, store)
+        self.store = store.copy()
+        self.sort()
+        self.cost = self.get_cost()
+
+    def _indexed_order_generator(self, amount, stock, store):
+        indexes = [i for i in range(1, store[2::].max()+1)]
+        return [Product(extract_from_set(indexes), random.randrange(1, stock)) for i in range(amount)]
+
+    def sort(self):
+        unordered_list = self._to_list()
+        sa = ListOrderer(
+            unordered_list, 100, 0.05, 10)
+        self.list = [self.list[unordered_list.index(
+            i)] for i in sa.simulated_annealing()]
+
+    def _to_point(self, result):
+        x = result[0][0]
+        y = result[1][0]
+        return (x, y)
+
+    def _to_list(self):
+        return [self._to_point(
+            np.where(self.store == i.index)) for i in self.list]
+
+    def get_cost(self):
+        return compute_distance(self._to_list())

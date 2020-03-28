@@ -1,7 +1,9 @@
+from itertools import permutations
 from algorithms.astar import Astar
 import random
 from utils.distances import manhattan as distance
 from math import exp
+import itertools
 # import itertools
 # from functools import reduce
 
@@ -53,17 +55,36 @@ class ListOrderer():
         self.T *= 1 - self.cooling_rate
 
     def get_neighbors(self):
+        # swapped_lists = []
+        # for i in self.list:
+        #     swapped_list = self.list.copy()
+        #     a, b = 0, 0
+        #     while a == b:
+        #         a = random.randrange(len(self.list) - 1)
+        #         b = random.randrange(len(self.list) - 1)
+        #     swapped_list[a], swapped_list[b] = swapped_list[b], swapped_list[a]
+        #     swapped_lists.append(swapped_list)
+        # return swapped_lists  # incomplete neighbors list
+        # correct but inefficient, WIP to develop more cautious alternative.
+        # return list(itertools.permutations(self.list))
+        # swapped_lists = []
+        # for i in range(len(self.list)):
+        #     idx = range(len(self.list))
+        #     a, b = random.sample(idx, 2)
+        #     seq = self.list.copy()
+        #     seq[a], seq[b] = seq[b], seq[a]
+        #     # return seq
+        #     swapped_lists.append(seq)
+        # return swapped_lists
         swapped_lists = []
+        a, b = 0, 0
         for i in self.list:
             swapped_list = self.list.copy()
-            a, b = 0, 0
-            while a == b:
-                a = random.randrange(len(self.list) - 1)
-                b = random.randrange(len(self.list) - 1)
-            swapped_list[a], swapped_list[b] = swapped_list[b], swapped_list[a]
-            swapped_lists.append(swapped_list)
+            a = self.list.index(i)
+            for b in range(a, len(swapped_list) - a):
+                swapped_list[a], swapped_list[b] = swapped_list[b], swapped_list[a]
+                swapped_lists.append(swapped_list)
         return swapped_lists  # incomplete neighbors list
-        # return list(itertools.permutations(self.list)) #correct but inefficient, WIP to develop more cautious alternative.
 
     def pick(self, list):
         iterations = 0

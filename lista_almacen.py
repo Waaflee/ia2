@@ -8,6 +8,7 @@ store_size = 3  # Not to big or memory will collapse!
 store = generate_store(store_size)
 orders = [i for i in order_generator(order_amount, store_size)]
 print("Current Distance: ", compute_distance(orders, store, False))
-lo = ListOrderer(orders, 100, 0.05, 10, seed=True, fast=False, store=store)
+# lo = ListOrderer(orders, 500, 0.05, 50, seed=True, fast=False, store=store)
+lo = ListOrderer(orders, 100, 0.05, 10, seed=True)
 print("Optimized Distance: ", compute_distance(
     lo.simulated_annealing(), store, False))

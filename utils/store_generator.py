@@ -29,7 +29,6 @@ def generate_indexed_store(rows, columns, randomize=False):
         numbers = [i for i in range(1, rows * columns * 8 + 1)]
     slot = 0
     store = np.zeros((6*rows, 4*columns), dtype=np.int)
-    print(store.shape)
     for l in range(0, columns):
         for k in range(0, rows):
             for i in range(0, 6):
