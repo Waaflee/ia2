@@ -1,5 +1,6 @@
 # !/usr/bin/python
 import random
+from utils.store_generator import extract_from_set
 
 
 def calculate_rows(size):
@@ -30,3 +31,17 @@ def order_generator(order_amount=24, store_size=2, seed=True):
                 y = random.randint(0, columns - 1)
         orders.add((x, y))
     return orders
+
+
+class Product():
+    def __init__(self, index, amount):
+        self.index = index
+        self.amount = amount
+
+    def __str__(self):
+        return f"(index: {self.index}, amount: {self.amount})"
+
+
+def indexed_order_generator(amount, stock, store):
+    indexes = [i for i in range(1, store[2::].max())]
+    return [Product(extract_from_set(indexes), random.randrange(1, stock)) for i in range(amount)]

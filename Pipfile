@@ -9,9 +9,9 @@ verify_ssl = true
 numpy = "*"
 autopep8 = "*"
 rope = "*"
-matplotlib = "*"
-numba = "*"
 pyyaml = "*"
+pydash = "*"
+numba = "*"
 
 [requires]
 python_version = "3.8"

@@ -2,12 +2,10 @@
 from utils.store_generator import generate_store
 from utils.orders import order_generator
 from algorithms.astar import Astar
-from algorithms.simulated_annealing import SimulatedAnnealing
+from algorithms.simulated_annealing_deprecated import SimulatedAnnealing
 
 store_size = 2
 orders = list(order_generator(2, store_size))
-# start = (10, 6)
-# end = (0, 0)
 start = orders[0]
 end = orders[1]
 

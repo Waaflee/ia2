@@ -1,86 +1,89 @@
-from utils.distances import manhattan as distance
+from algorithms.astar import Astar
 import random
-from math import exp, log
+from utils.distances import manhattan as distance
+from math import exp
+# import itertools
+# from functools import reduce
 
 
-class Node():
-    def __init__(self, point, distance, parent):
-        self.point = point
-        self.distance = distance
-        self.parent = parent
+def round_trip(l):
+    rounded_l = l.copy()
+    rounded_l.insert(0, (0, 0))
+    rounded_l.append((0, 0))
+    return rounded_l
 
 
-class SimulatedAnnealing():
-    start = 0
-    end = 0
-    current = 0
+def compute_distance(path, store=None, fast=True):
+    acc = 0
+    if (fast):
+        for i in range(1, len(path)):
+            # Using Manhattan for distance finding (Faster, valid only for this particular scenario)
+            acc += distance(path[i - 1], path[i])
+    else:
+        A = Astar(store)
+        # Using A* algorithm for distance finding (Accurate and generic, valid for several scenarios. Slower)
+        for i in range(1, len(path)):
+            acc += len(A.astar(path[i - 1], path[i]))
+    # return reduce((lambda x, y: distance(x, y)), path)
+    return acc
 
-    def __init__(self, maze, Temperature=10**4, cooling_rate=0.003, seed=True):
-        # self.maze = []
-        self.maze_original = maze
+
+class ListOrderer():
+    def __init__(self, list, Temperature=10 ** 4, cooling_rate=0.003, iterations=10, seed=True, fast=True, store=None):
+        self.list = list.copy()
         self.T = Temperature
         self.cooling_rate = cooling_rate
+        self.iterations = iterations
+        self.fast = fast
+        self.store = store
         if seed:
             random.seed()
 
-    def simulated_annealing(self, start, end):
-        self.maze = self.maze_original.copy()
-        self.start = start
-        self.end = end
-        self.current = Node(self.start, distance(self.start, self.end), None)
-        while self.T > 0.0001:
-            # print(self.maze)
-            # import time
-            # time.sleep(0.05)
-            if self.current.point == self.end:
-                return self.get_path(self.current)
-            else:
-                self.current = self.pick(self.get_neighbors(self.current))
-                self.update_temp()
+    def compute_distance(self, path):
+        return compute_distance(path, self.store, self.fast)
 
+    def simulated_annealing(self):
+        while self.T > 0.01:
+            self.list = self.pick(self.get_neighbors())
+            self.update_temp()
         else:
-            print("No path founded from ", self.start, " to ", self.end)
-            return []
+            return self.get_path()
 
     def update_temp(self):
         self.T *= 1 - self.cooling_rate
 
-    def get_neighbors(self, current):
-        x, y = current.point
-        childs = []
-        for i in [(x - 1, y), (x, y - 1), (x, y + 1), (x + 1, y)]:
-            point = i
-            if (point[0] >= 0 and point[0] < self.maze.shape[0]) and (point[1] >= 0 and point[1] < self.maze.shape[1]):
-                if self.maze[point[0]][point[1]] == 0:
-                    child = Node(i, distance(current.point, self.end), current)
-                    childs.append(child)
-                elif self.maze[point[0]][point[1]] == 1:
-                    if point == self.end:
-                        return [Node(i, distance(current.point, self.end), current)]
-                else:
-                    continue
-        return childs
+    def get_neighbors(self):
+        swapped_lists = []
+        for i in self.list:
+            swapped_list = self.list.copy()
+            a, b = 0, 0
+            while a == b:
+                a = random.randrange(len(self.list) - 1)
+                b = random.randrange(len(self.list) - 1)
+            swapped_list[a], swapped_list[b] = swapped_list[b], swapped_list[a]
+            swapped_lists.append(swapped_list)
+        return swapped_lists  # incomplete neighbors list
+        # return list(itertools.permutations(self.list)) #correct but inefficient, WIP to develop more cautious alternative.
 
     def pick(self, list):
-        while True:
+        iterations = 0
+        while iterations <= self.iterations:
+            iterations += 1
             try:
                 chosen = random.choice(list)
             except IndexError as e:
-                return self.current.parent
-            if chosen.distance <= self.current.distance:
-                self.maze[chosen.point] = 2
+                return self.list
+            chosen_cost = self.compute_distance(round_trip(chosen))
+            current_cost = self.compute_distance(round_trip(self.list))
+            if chosen_cost <= current_cost:
                 return chosen
             else:
-                delta = self.current.distance - chosen.distance
+                delta = current_cost - chosen_cost
                 probability = exp(delta/self.T)
                 if random.random() < probability:
-                    self.maze[chosen.point] = 2
                     return chosen
+        else:
+            return self.list
 
-    def get_path(self, current):
-        path = []
-        while current.parent:
-            path.append(current)
-            current = current.parent
-        path.append(current)
-        return path[::-1]
+    def get_path(self):
+        return self.list
