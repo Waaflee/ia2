@@ -1,7 +1,6 @@
 from algorithms.astar import Astar
 from utils.distances import manhattan as distance
 from math import exp
-import itertools
 import random
 
 # How much costs everything going from and to the starting point.
@@ -67,9 +66,7 @@ class ListOrderer():
             self.best["cost"] = cost
 
     def get_neighbors(self):
-        # return [list(i) for i in itertools.permutations(self.list)]
         swapped_lists = []
-        # for i in range(len(self.list)):
         while len(swapped_lists) < len(self.list) / 2:
             idx = range(len(self.list))
             a, b = random.sample(idx, 2)
