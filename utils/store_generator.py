@@ -1,6 +1,8 @@
 import numpy as np
 import random
 
+# deprecated
+
 
 def generate_store(size):
     storage = np.ones([4, 2])

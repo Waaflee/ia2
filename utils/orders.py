@@ -17,7 +17,7 @@ def create_order(store, size, uniques=False):
 
 
 def sort_order(order, store):
-    sa = ListOrderer(order_to_points(order[0], store))
+    sa = ListOrderer(order_to_points(order, store))
     return points_to_order(sa.simulated_annealing(), store)
 
 
