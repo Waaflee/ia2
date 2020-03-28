@@ -48,6 +48,8 @@ class ListOrderer():
         return compute_distance(path, self.store, self.fast)
 
     def simulated_annealing(self):
+        if len(self.list) == 1:
+            return self.list
         while self.T > 0.01:
             self.list = self.pick(self.get_neighbors())
             self.is_better()
@@ -65,7 +67,17 @@ class ListOrderer():
             self.best["cost"] = cost
 
     def get_neighbors(self):
-        return [list(i) for i in itertools.permutations(self.list)]
+        # return [list(i) for i in itertools.permutations(self.list)]
+        swapped_lists = []
+        # for i in range(len(self.list)):
+        while len(swapped_lists) < len(self.list) / 2:
+            idx = range(len(self.list))
+            a, b = random.sample(idx, 2)
+            seq = self.list.copy()
+            seq[a], seq[b] = seq[b], seq[a]
+            if seq not in swapped_lists:
+                swapped_lists.append(seq)
+        return swapped_lists
 
     def pick(self, list):
         iterations = 0
