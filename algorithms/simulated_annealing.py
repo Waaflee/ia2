@@ -1,11 +1,10 @@
-from itertools import permutations
 from algorithms.astar import Astar
-import random
 from utils.distances import manhattan as distance
 from math import exp
 import itertools
-# import itertools
-# from functools import reduce
+import random
+
+# How much costs everything going from and to the starting point.
 
 
 def round_trip(l):
@@ -17,6 +16,7 @@ def round_trip(l):
 
 def compute_distance(path, store=None, fast=True):
     acc = 0
+    path = round_trip(path)
     if (fast):
         for i in range(1, len(path)):
             # Using Manhattan for distance finding (Faster, valid only for this particular scenario)
@@ -26,7 +26,6 @@ def compute_distance(path, store=None, fast=True):
         # Using A* algorithm for distance finding (Accurate and generic, valid for several scenarios. Slower)
         for i in range(1, len(path)):
             acc += len(A.astar(path[i - 1], path[i]))
-    # return reduce((lambda x, y: distance(x, y)), path)
     return acc
 
 
@@ -38,6 +37,10 @@ class ListOrderer():
         self.iterations = iterations
         self.fast = fast
         self.store = store
+        self.best = {
+            "list": self.list.copy(),
+            "cost": self.compute_distance(self.list)
+        }
         if seed:
             random.seed()
 
@@ -47,6 +50,7 @@ class ListOrderer():
     def simulated_annealing(self):
         while self.T > 0.01:
             self.list = self.pick(self.get_neighbors())
+            self.is_better()
             self.update_temp()
         else:
             return self.get_path()
@@ -54,37 +58,14 @@ class ListOrderer():
     def update_temp(self):
         self.T *= 1 - self.cooling_rate
 
+    def is_better(self):
+        cost = self.compute_distance(self.list)
+        if cost < self.best["cost"]:
+            self.best["list"] = self.list.copy()
+            self.best["cost"] = cost
+
     def get_neighbors(self):
-        # swapped_lists = []
-        # for i in self.list:
-        #     swapped_list = self.list.copy()
-        #     a, b = 0, 0
-        #     while a == b:
-        #         a = random.randrange(len(self.list) - 1)
-        #         b = random.randrange(len(self.list) - 1)
-        #     swapped_list[a], swapped_list[b] = swapped_list[b], swapped_list[a]
-        #     swapped_lists.append(swapped_list)
-        # return swapped_lists  # incomplete neighbors list
-        # correct but inefficient, WIP to develop more cautious alternative.
-        # return list(itertools.permutations(self.list))
-        # swapped_lists = []
-        # for i in range(len(self.list)):
-        #     idx = range(len(self.list))
-        #     a, b = random.sample(idx, 2)
-        #     seq = self.list.copy()
-        #     seq[a], seq[b] = seq[b], seq[a]
-        #     # return seq
-        #     swapped_lists.append(seq)
-        # return swapped_lists
-        swapped_lists = []
-        a, b = 0, 0
-        for i in self.list:
-            swapped_list = self.list.copy()
-            a = self.list.index(i)
-            for b in range(a, len(swapped_list) - a):
-                swapped_list[a], swapped_list[b] = swapped_list[b], swapped_list[a]
-                swapped_lists.append(swapped_list)
-        return swapped_lists  # incomplete neighbors list
+        return [list(i) for i in itertools.permutations(self.list)]
 
     def pick(self, list):
         iterations = 0
@@ -94,9 +75,9 @@ class ListOrderer():
                 chosen = random.choice(list)
             except IndexError as e:
                 return self.list
-            chosen_cost = self.compute_distance(round_trip(chosen))
-            current_cost = self.compute_distance(round_trip(self.list))
-            if chosen_cost <= current_cost:
+            chosen_cost = self.compute_distance(chosen)
+            current_cost = self.compute_distance(self.list)
+            if chosen_cost < current_cost:
                 return chosen
             else:
                 delta = current_cost - chosen_cost
@@ -107,4 +88,4 @@ class ListOrderer():
             return self.list
 
     def get_path(self):
-        return self.list
+        return self.best["list"]
