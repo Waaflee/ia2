@@ -120,7 +120,7 @@ if __name__ == "__main__":
     random.seed()
     o_cant = 5
     o_len = 8
-    store_size = (2, 2)  # Not to big or memory will collapse!
+    store_size = (1, 1)  # Not to big or memory will collapse!
     store_max = store_size[0] * store_size[1] * 8
     store_shape = (store_size[0] * 6, store_size[1]*4)
 
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     # Testing deterministic orders
     # orders = [[1, 2, 3], [2, 3], [1, 3], [
     #     1, 2], [2, 3], [2, 5], [5, 7], [3, 7]]
-    # orders = [[6, 7, 8], [6, 7, 8], [6, 7, 8], [6, 7, 8]]
+    orders = [[6, 7, 8], [6, 7, 8], [6, 7, 8], [6, 7, 8]]
     # orders = [[1, 5, 8], [1, 5, 8], [1, 5, 8], [1, 5, 8]]
     # orders += [[15, 24, 4], [15, 24, 4], [15, 24, 4], [15, 24, 4]]
 
