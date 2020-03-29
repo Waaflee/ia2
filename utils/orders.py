@@ -1,3 +1,4 @@
+import multiprocessing
 import random
 import numpy as np
 from algorithms.simulated_annealing import ListOrderer
@@ -19,6 +20,13 @@ def create_order(store, size, uniques=False):
 def sort_order(order, store):
     sa = ListOrderer(order_to_points(order, store))
     return points_to_order(sa.simulated_annealing(), store)
+
+
+def sort_orders(orders, store):
+    # pool = multiprocessing.Pool(len(orders))
+    # return list(zip(*pool.starmap(sort_order, [(i, store) for i in orders])))
+    with multiprocessing.Pool(processes=3) as pool:
+        return list(zip(*pool.starmap(sort_order, [(i, store) for i in orders])))
 
 
 def array_to_point(array):

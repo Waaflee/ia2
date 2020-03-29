@@ -9,7 +9,7 @@ import numpy as np
 
 class GeneticStore():
     max_iterations = 100
-    min_increment = 0.01
+    min_increment = 0.001
 
     def __init__(self, size, orders):
         self.size = size
@@ -45,15 +45,15 @@ class GeneticStore():
             nex_best = self.evolve()
             if abs(self.best["score"] - nex_best["score"]) < self.min_increment:
                 return nex_best["store"]
-            else:
+            if self.best["score"] > nex_best["score"]:
                 self.best = nex_best
 
     def evolve(self):
-        stores = self.fitness()
-        nex_gen = self.match(stores)
+        nex_gen = self.match(self.fitness())
         for i in nex_gen:
-            mutations = random.randint(1, sum(self.size))
-            self.mutate(i, mutations)
+            if random.random() > 0.5:
+                mutations = random.randint(1, sum(self.size))
+                self.mutate(i, mutations)
         self.population = nex_gen
         stores = self.fitness()
         return stores[0]
@@ -61,7 +61,7 @@ class GeneticStore():
     def match(self, stores):
         weights = [i["score"] for i in stores]
         new_population = []
-        for i in len(self.population)/2:
+        for i in range(int(len(self.population)/2)):
             match = random.choices([i["store"]
                                     for i in stores], weights=weights, k=2)
             # stores.remove(match[0])
@@ -70,6 +70,7 @@ class GeneticStore():
         return new_population
 
     def crossover(self, stores):
+        # Produce sub especificación
         index = random.randint(2, len(stores[0])-1)
         son_a = np.concatenate((stores[0][:index, :], stores[1][index:, :]))
         son_b = np.concatenate((stores[1][:index, :], stores[0][index:, :]))
@@ -100,16 +101,21 @@ if __name__ == "__main__":
     store = generate_indexed_store(*store_size)
     orders = [create_order(store, random.randint(1, o_len))
               for i in range(o_cant)]
-    orders = [sort_order(i, store) for i in orders]
+    # orders = [sort_order(i, store) for i in orders]
+    orders = sort_orders(orders, store)
     gs = GeneticStore(store_size, orders)
     current_fitness = gs.score(store)
     acc = 0
     while acc < 100:
+        acc += 1
         store = gs.run()
-        orders = [sort_order(i, store) for i in orders]
+        # orders = [sort_order(i, store) for i in orders]
+        orders = sort_orders(orders, store)
         gs = GeneticStore(store_size, orders)
-        new_fitness = gs.score()
-        if abs(current_fitness - new_fitness) < 0.1:
+        new_fitness = gs.score(store)
+        if abs(current_fitness - new_fitness) < 0:
             break
+        else:
+            current_fitness = new_fitness
     print("Optimized Store: ")
     print(store)
