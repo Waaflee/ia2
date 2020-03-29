@@ -4,29 +4,31 @@ import numpy as np
 from algorithms.simulated_annealing import ListOrderer
 
 
-def create_order(store, size, uniques=False):
+def create_order(max, size, uniques=False):
     if uniques:
-        order = set()
+        new_order = set()
         for i in range(size):
-            order.add(random.randint(1, store[2::].max()))
-        return list(order)
+            new_order.add(random.randint(1, max))
+        return list(new_order)
     else:
-        order = []
+        new_order = []
         for i in range(size):
-            order.append(random.randint(1, store[2::].max()))
-        return order
+            new_order.append(random.randint(1, max))
+        return new_order
 
 
 def sort_order(order, store):
     sa = ListOrderer(order_to_points(order, store))
-    return points_to_order(sa.simulated_annealing(), store)
+    sorted_order = points_to_order(sa.simulated_annealing(), store)
+    return sorted_order
 
 
 def sort_orders(orders, store):
     # pool = multiprocessing.Pool(len(orders))
     # return list(zip(*pool.starmap(sort_order, [(i, store) for i in orders])))
-    with multiprocessing.Pool(processes=3) as pool:
-        return list(zip(*pool.starmap(sort_order, [(i, store) for i in orders])))
+    with multiprocessing.Pool(processes=len(orders)) as pool:
+        sorted_orders = pool.starmap(sort_order, [(i, store) for i in orders])
+    return sorted_orders
 
 
 def array_to_point(array):
