@@ -5,6 +5,7 @@ from functools import reduce
 import random
 
 import numpy as np
+import itertools
 
 
 class GeneticStore():
@@ -71,14 +72,21 @@ class GeneticStore():
 
     def crossover(self, stores):
         # Produce sub especificación
-        index = random.randint(2, len(stores[0])-1)
-        son_a = np.concatenate((stores[0][:index, :], stores[1][index:, :]))
-        son_b = np.concatenate((stores[1][:index, :], stores[0][index:, :]))
-        son_a = np.concatenate(
-            (stores[0][:, :index], stores[1][:, index:]), axis=1)
-        son_b = np.concatenate(
-            (stores[1][:, :index], stores[0][:, index:]), axis=1)
-        return [son_a, son_b]
+        # index = random.randint(2, len(stores[0])-1)
+        # son_a = np.concatenate((stores[0][:index, :], stores[1][index:, :]))
+        # son_b = np.concatenate((stores[1][:index, :], stores[0][index:, :]))
+        # son_a = np.concatenate(
+        #     (stores[0][:, :index], stores[1][:, index:]), axis=1)
+        # son_b = np.concatenate(
+        #     (stores[1][:, :index], stores[0][:, index:]), axis=1)
+        # return [son_a, son_b]
+
+        # PMX crossover
+        # 2 different split points
+        idx_a = random.randint(2, len(stores[0])-1)
+        idx_b = random.randint(2, len(stores[0])-1)
+        while idx_a == idx_b:
+            idx_b = random.randint(2, len(stores[0])-1)
 
     def mutate(self, store, mutations=1):
         for i in range(mutations):
@@ -94,28 +102,65 @@ class GeneticStore():
 
 
 if __name__ == "__main__":
-    random.seed()
-    o_cant = 3
-    o_len = 8
+    # random.seed()
+    # o_cant = 3
+    # o_len = 8
     store_size = (1, 1)  # Not to big or memory will collapse!
+
     store = generate_indexed_store(*store_size)
-    orders = [create_order(store, random.randint(1, o_len))
-              for i in range(o_cant)]
-    # orders = [sort_order(i, store) for i in orders]
-    orders = sort_orders(orders, store)
-    gs = GeneticStore(store_size, orders)
-    current_fitness = gs.score(store)
-    acc = 0
-    while acc < 100:
-        acc += 1
-        store = gs.run()
-        # orders = [sort_order(i, store) for i in orders]
-        orders = sort_orders(orders, store)
-        gs = GeneticStore(store_size, orders)
-        new_fitness = gs.score(store)
-        if abs(current_fitness - new_fitness) < 0:
-            break
-        else:
-            current_fitness = new_fitness
-    print("Optimized Store: ")
-    print(store)
+    store_shape = store.shape
+
+    # orders = [create_order(store, random.randint(1, o_len))
+    #           for i in range(o_cant)]
+    # # orders = [sort_order(i, store) for i in orders]
+    # orders = sort_orders(orders, store)
+    # gs = GeneticStore(store_size, orders)
+    # current_fitness = gs.score(store)
+    # acc = 0
+    # while acc < 100:
+    #     acc += 1
+    #     store = gs.run()
+    #     # orders = [sort_order(i, store) for i in orders]
+    #     orders = sort_orders(orders, store)
+    #     gs = GeneticStore(store_size, orders)
+    #     new_fitness = gs.score(store)
+    #     if abs(current_fitness - new_fitness) < 0:
+    #         break
+    #     else:
+    #         current_fitness = new_fitness
+    # print("Optimized Store: ")
+    # print(store)
+    print("---------------------------------")
+    store = generate_indexed_store(*store_size)
+    a = store.flatten()
+    store = generate_indexed_store(*store_size, True)
+    b = store.flatten()
+    # b = b[::-1]
+    print(a)
+    print(b)
+
+    cicles = list()
+    cicle = set()
+    for i in a:
+        if i != 0:
+            if i not in list(itertools.chain.from_iterable(cicles)):
+                p1 = i
+                p2 = 0
+                cicle.add(i)
+                while p2 != i:
+                    p2 = int(b[np.where(a == p1)])
+                    cicle.add(p2)
+                    p1 = int(a[np.where(a == p2)])
+                    cicle.add(p1)
+                cicles.append(list(cicle))
+                cicle = set()
+    for i in range(len(cicles)):
+        if i % 2 == 1:
+            cicle = cicles[i]
+            indexes = [np.where(a == j) for j in cicle]
+            for k in indexes:
+                a[k[0]], b[k[0]] = b[k[0]], a[k[0]]
+    print("Crossover: ")
+    print(a)
+    print(b)
+    print(cicles)
