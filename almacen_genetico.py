@@ -10,7 +10,7 @@ import itertools
 
 class GeneticStore():
     max_iterations = 20
-    min_increment = 0.001
+    min_increment = 1
 
     def __init__(self, size, orders, shape):
         self.size = size
@@ -42,37 +42,41 @@ class GeneticStore():
         acc = 0
         while acc < self.max_iterations:
             acc += 1
-            self.evolve()
-            current_population_score = self.pop_score()
-            if (self.population_score-current_population_score)/current_population_score < self.min_increment:
+            new_population = self.evolve()
+            new_population_score = self.pop_score()
+            if (new_population_score/self.population_score) < self.min_increment:
                 # return min([self.score(i) for i in self.population])
                 return self.fitness()[0]
                 # return self.fitness()[0]["store"]
-            self.population_score = current_population_score
+            if self.population_score >= new_population_score:
+                self.population_score = new_population_score
+                self.population = new_population.copy()
         return self.fitness()[0]
 
     def evolve(self):
-        nex_gen = self.match(self.fitness())
-        for i in nex_gen:
+        next_gen = self.match(self.fitness())
+        for i in next_gen:
             # if random.random() > 0.25:
-            mutations = random.randint(1, sum(self.size))
+            mutations = random.randint(0, sum(self.size))
             self.mutate(i, mutations)
-        self.population = nex_gen.copy()
-        return
+        return next_gen.copy()
 
     def match(self, stores):
         weights = [i["score"] for i in stores]
         new_population = []
-        # for i in range(int(len(self.population)/2)):
-        #     match = random.choices([i["store"]
-        #                             for i in stores], weights=weights, k=2)
-        #     # match = random.sample(self.population, 2)
-        #     # stores.remove(match[0])
-        #     # stores.remove(match[1])
-        #     new_population += self.crossover(match)
-        for i in range(1, (len(self.population)), 2):
-            pair = [stores[i-1]["store"], stores[i]["store"]]
+        for i in range(int(len(self.population)/2)):
+            # Probabilistic selection
+            pair = random.choices([i["store"]
+                                   for i in stores], weights=weights, k=2)
+            # Full random selection
+            # pair = random.sample(self.population, 2)
+            # stores.remove(match[0])
+            # stores.remove(match[1])
             new_population += self.crossover(pair)
+        # Ranked selection
+        # for i in range(1, (len(self.population)), 2):
+        #     pair = [stores[i-1]["store"], stores[i]["store"]]
+        #     new_population += self.crossover(pair)
         return new_population
 
     def crossover(self, stores):
@@ -121,9 +125,9 @@ class GeneticStore():
 
 if __name__ == "__main__":
     random.seed()
-    o_cant = 20
-    o_len = 50
-    store_size = (3, 4)  # Not to big or memory will collapse!
+    o_cant = 5
+    o_len = 8
+    store_size = (1, 1)  # Not to big or memory will collapse!
     store_max = store_size[0] * store_size[1] * 8
     store_shape = (store_size[0] * 6, store_size[1]*4)
     store = generate_indexed_store(*store_size)
