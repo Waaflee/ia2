@@ -9,8 +9,8 @@ import itertools
 
 
 class GeneticStore():
-    max_iterations = 100
-    min_increment = 0.99
+    max_iterations = 20
+    min_increment = 0.001
 
     def __init__(self, size, orders, shape):
         self.size = size
@@ -44,7 +44,7 @@ class GeneticStore():
             acc += 1
             self.evolve()
             current_population_score = self.pop_score()
-            if current_population_score / self.population_score > self.min_increment:
+            if (self.population_score-current_population_score)/current_population_score < self.min_increment:
                 # return min([self.score(i) for i in self.population])
                 return self.fitness()[0]
                 # return self.fitness()[0]["store"]
@@ -121,9 +121,9 @@ class GeneticStore():
 
 if __name__ == "__main__":
     random.seed()
-    o_cant = 3
-    o_len = 8
-    store_size = (1, 1)  # Not to big or memory will collapse!
+    o_cant = 20
+    o_len = 50
+    store_size = (3, 4)  # Not to big or memory will collapse!
     store_max = store_size[0] * store_size[1] * 8
     store_shape = (store_size[0] * 6, store_size[1]*4)
     store = generate_indexed_store(*store_size)
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     print("First optimization: ", store["cost"])
     current_fitness = gs.score(store["store"])
     acc = 0
-    while acc < 100:
+    while acc < 10:
         acc += 1
         store = gs.run()
         orders = sort_orders(orders, store["store"])
