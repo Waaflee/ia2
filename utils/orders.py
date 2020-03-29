@@ -24,8 +24,6 @@ def sort_order(order, store):
 
 
 def sort_orders(orders, store):
-    # pool = multiprocessing.Pool(len(orders))
-    # return list(zip(*pool.starmap(sort_order, [(i, store) for i in orders])))
     with multiprocessing.Pool(processes=len(orders)) as pool:
         sorted_orders = pool.starmap(sort_order, [(i, store) for i in orders])
     return sorted_orders
