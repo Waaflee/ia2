@@ -9,7 +9,7 @@ import itertools
 
 
 class GeneticStore():
-    max_iterations = 20
+    max_iterations = 50
     min_increment = 1
 
     def __init__(self, size, orders, shape):
@@ -18,6 +18,11 @@ class GeneticStore():
         self.orders = orders
         self.population = []
         self.population_score = 0
+        self.best = {
+            "cost": 10000000000,
+            "store": None,
+            "score": 0.0001
+        }
         self.populate()
 
     def populate(self):
@@ -26,6 +31,28 @@ class GeneticStore():
                 self.size[0], self.size[1], randomize=True)
             )
         self.population_score = self.pop_score()
+
+    def run(self):
+        acc = 0
+        while acc < self.max_iterations:
+            acc += 1
+
+            new_population = self.evolve()
+            self.population = new_population
+
+            local_best = self.fitness()[0]
+
+            if (self.best["cost"] > local_best["cost"]):
+                self.best = local_best
+
+        return self.best
+
+    def evolve(self):
+        next_gen = self.match(self.fitness())
+        for i in next_gen:
+            mutations = random.randint(0, sum(self.size))
+            self.mutate(i, mutations)
+        return next_gen.copy()
 
     def fitness(self):
         stores = []
@@ -37,29 +64,6 @@ class GeneticStore():
             i["cost"] = i["score"]
             i["score"] = 1 - (i["score"] / norm)
         return stores
-
-    def run(self):
-        acc = 0
-        while acc < self.max_iterations:
-            acc += 1
-            new_population = self.evolve()
-            new_population_score = self.pop_score()
-            if (new_population_score/self.population_score) < self.min_increment:
-                # return min([self.score(i) for i in self.population])
-                return self.fitness()[0]
-                # return self.fitness()[0]["store"]
-            if self.population_score >= new_population_score:
-                self.population_score = new_population_score
-                self.population = new_population.copy()
-        return self.fitness()[0]
-
-    def evolve(self):
-        next_gen = self.match(self.fitness())
-        for i in next_gen:
-            # if random.random() > 0.25:
-            mutations = random.randint(0, sum(self.size))
-            self.mutate(i, mutations)
-        return next_gen.copy()
 
     def match(self, stores):
         weights = [i["score"] for i in stores]
@@ -130,24 +134,51 @@ if __name__ == "__main__":
     store_size = (1, 1)  # Not to big or memory will collapse!
     store_max = store_size[0] * store_size[1] * 8
     store_shape = (store_size[0] * 6, store_size[1]*4)
-    store = generate_indexed_store(*store_size)
-    orders = [create_order(store_max, random.randint(1, o_len), True)
-              for i in range(o_cant)]
+
+    # store = generate_indexed_store(*store_size)
+
+    # # orders = [create_order(store_max, random.randint(1, o_len), True)
+    # #           for i in range(o_cant)]
+
+    orders = [[1, 2, 3], [2, 3], [1, 3], [
+        1, 2], [2, 3], [2, 5], [5, 7], [3, 7]]
+
     gs = GeneticStore(store_size, orders, store_shape)
-    print("Initial Cost: ", gs.score(store))
-    store = gs.run()
-    print("First optimization: ", store["cost"])
-    current_fitness = gs.score(store["store"])
-    acc = 0
-    while acc < 10:
-        acc += 1
-        store = gs.run()
-        orders = sort_orders(orders, store["store"])
-        gs = GeneticStore(store_size, orders, store_shape)
-        new_fitness = gs.score(store["store"])
-        if abs(current_fitness - new_fitness) < 0:
-            break
-        else:
-            current_fitness = new_fitness
-    print("Optimized Store: ")
-    print(store)
+    # print("Initial Cost: ", gs.score(store))
+    # store = gs.run()
+
+    # print("First optimization: ", store["cost"])
+    # # print("Store:", store["store"])
+
+    # acc = 0
+    # while acc < 25:
+
+    #     acc += 1
+    #     store = gs.run()
+    #     orders = sort_orders(orders, store["store"])
+    #     gs = GeneticStore(store_size, orders, store_shape)
+
+    # print("Optimized Store: ")
+    # print("cost: ", store["cost"])
+    # print(store["store"])
+
+    # print("Test Section:")
+    # stores = [generate_indexed_store(*(1, 1)), generate_indexed_store(*(1, 1))]
+    # store_b = stores[1]
+    # store_b = store_b.flatten()
+    # store_b = store_b[::-1]
+    # store_b = np.reshape(store_b, (6, 4))
+    # stores[1] = store_b
+    # print("----------------------------------------------------")
+    # print("----------------------------------------------------")
+    # print("Original Stores:")
+    # print(stores[0].flatten(), stores[1].flatten(), sep="\n")
+    # stores = gs.crossover(stores)
+    # print("----------------------------------------------------")
+    # print("Cycles based crossover:")
+    # print(stores[0].flatten(), stores[1].flatten(), sep="\n")
+    # print("----------------------------------------------------")
+    # print("After mutation:")
+    # gs.mutate(stores[0], 1)
+    # gs.mutate(stores[1], 1)
+    # print(stores[0].flatten(), stores[1].flatten(), sep="\n")
