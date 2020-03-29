@@ -10,7 +10,6 @@ import itertools
 
 class GeneticStore():
     max_iterations = 50
-    min_increment = 1
 
     def __init__(self, size, orders, shape):
         self.size = size
@@ -36,22 +35,19 @@ class GeneticStore():
         acc = 0
         while acc < self.max_iterations:
             acc += 1
-
             new_population = self.evolve()
             self.population = new_population
-
             local_best = self.fitness()[0]
-
             if (self.best["cost"] > local_best["cost"]):
                 self.best = local_best
-
         return self.best
 
     def evolve(self):
         next_gen = self.match(self.fitness())
         for i in next_gen:
-            mutations = random.randint(0, sum(self.size))
-            self.mutate(i, mutations)
+            if random.random() > 0.2:
+                mutations = random.randint(1, sum(self.size))
+                self.mutate(i, mutations)
         return next_gen.copy()
 
     def fitness(self):
@@ -69,18 +65,9 @@ class GeneticStore():
         weights = [i["score"] for i in stores]
         new_population = []
         for i in range(int(len(self.population)/2)):
-            # Probabilistic selection
             pair = random.choices([i["store"]
                                    for i in stores], weights=weights, k=2)
-            # Full random selection
-            # pair = random.sample(self.population, 2)
-            # stores.remove(match[0])
-            # stores.remove(match[1])
             new_population += self.crossover(pair)
-        # Ranked selection
-        # for i in range(1, (len(self.population)), 2):
-        #     pair = [stores[i-1]["store"], stores[i]["store"]]
-        #     new_population += self.crossover(pair)
         return new_population
 
     def crossover(self, stores):
@@ -128,39 +115,45 @@ class GeneticStore():
 
 
 if __name__ == "__main__":
+    print("----------------------------------------------------")
+    print("----------------------------------------------------")
     random.seed()
     o_cant = 5
     o_len = 8
-    store_size = (1, 1)  # Not to big or memory will collapse!
+    store_size = (2, 2)  # Not to big or memory will collapse!
     store_max = store_size[0] * store_size[1] * 8
     store_shape = (store_size[0] * 6, store_size[1]*4)
 
-    # store = generate_indexed_store(*store_size)
+    store = generate_indexed_store(*store_size)
 
-    # # orders = [create_order(store_max, random.randint(1, o_len), True)
-    # #           for i in range(o_cant)]
+    orders = [create_order(store_max, random.randint(1, o_len), True)
+              for i in range(o_cant)]
 
-    orders = [[1, 2, 3], [2, 3], [1, 3], [
-        1, 2], [2, 3], [2, 5], [5, 7], [3, 7]]
+    # Testing deterministic orders
+    # orders = [[1, 2, 3], [2, 3], [1, 3], [
+    #     1, 2], [2, 3], [2, 5], [5, 7], [3, 7]]
+    # orders = [[6, 7, 8], [6, 7, 8], [6, 7, 8], [6, 7, 8]]
+    # orders = [[1, 5, 8], [1, 5, 8], [1, 5, 8], [1, 5, 8]]
+    # orders += [[15, 24, 4], [15, 24, 4], [15, 24, 4], [15, 24, 4]]
 
     gs = GeneticStore(store_size, orders, store_shape)
-    # print("Initial Cost: ", gs.score(store))
-    # store = gs.run()
+    print("Initial Cost: ", gs.score(store))
 
-    # print("First optimization: ", store["cost"])
-    # # print("Store:", store["store"])
+    store = gs.run()
+    print("First optimization: ", store["cost"])
+    # print("Store:", store["store"])
 
-    # acc = 0
-    # while acc < 25:
+    acc = 0
+    while acc < 25:
 
-    #     acc += 1
-    #     store = gs.run()
-    #     orders = sort_orders(orders, store["store"])
-    #     gs = GeneticStore(store_size, orders, store_shape)
+        acc += 1
+        store = gs.run()
+        orders = sort_orders(orders, store["store"])
+        gs = GeneticStore(store_size, orders, store_shape)
 
-    # print("Optimized Store: ")
-    # print("cost: ", store["cost"])
-    # print(store["store"])
+    print("Optimized Store: ")
+    print("cost: ", store["cost"])
+    print(store["store"])
 
     # print("Test Section:")
     # stores = [generate_indexed_store(*(1, 1)), generate_indexed_store(*(1, 1))]
