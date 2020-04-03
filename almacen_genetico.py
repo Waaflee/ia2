@@ -108,7 +108,9 @@ class GeneticStore():
             store[point_b] = item_a
 
     def score(self, store):
-        return sum([compute_distance(order_to_points(i, store)) for i in self.orders])
+        orders = self.orders.copy()
+        orders = sort_orders(orders, store)
+        return sum([compute_distance(order_to_points(i, store)) for i in orders])
 
     def pop_score(self):
         return sum([self.score(i) for i in self.population])
@@ -118,8 +120,8 @@ if __name__ == "__main__":
     print("----------------------------------------------------")
     print("----------------------------------------------------")
     random.seed()
-    o_cant = 5
-    o_len = 8
+    o_cant = 4
+    o_len = 4
     store_size = (1, 1)  # Not to big or memory will collapse!
     store_max = store_size[0] * store_size[1] * 8
     store_shape = (store_size[0] * 6, store_size[1]*4)
@@ -147,8 +149,8 @@ if __name__ == "__main__":
     while acc < 25:
 
         acc += 1
-        store = gs.run()
         orders = sort_orders(orders, store["store"])
+        store = gs.run()
         gs = GeneticStore(store_size, orders, store_shape)
 
     print("Optimized Store: ")
