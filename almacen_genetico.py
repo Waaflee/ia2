@@ -52,8 +52,10 @@ class GeneticStore():
 
     def fitness(self):
         stores = []
-        for i in self.population:
-            stores.append({"score": self.score(i), "store": i})
+        with multiprocessing.Pool(processes=4) as pool:
+            scores = pool.map(self.score, self.population)
+        for score, i in zip(scores, self.population):
+            stores.append({"score": score, "store": i})
         norm = sum([i["score"] for i in stores])
         stores.sort(key=lambda x: x["score"])
         for i in stores:
@@ -109,7 +111,8 @@ class GeneticStore():
 
     def score(self, store):
         orders = self.orders.copy()
-        orders = sort_orders(orders, store)
+        # orders = sort_orders(orders, store)
+        orders = [sort_order(i, store) for i in orders]
         return sum([compute_distance(order_to_points(i, store)) for i in orders])
 
     def pop_score(self):
@@ -142,20 +145,19 @@ if __name__ == "__main__":
     print("Initial Cost: ", gs.score(store))
 
     store = gs.run()
-    print("First optimization: ", store["cost"])
+    # print("First optimization: ", store["cost"])
     # print("Store:", store["store"])
-
-    acc = 0
-    while acc < 25:
-
-        acc += 1
-        orders = sort_orders(orders, store["store"])
-        store = gs.run()
-        gs = GeneticStore(store_size, orders, store_shape)
-
     print("Optimized Store: ")
     print("cost: ", store["cost"])
     print(store["store"])
+
+    # acc = 0
+    # while acc < 25:
+
+    #     acc += 1
+    #     orders = sort_orders(orders, store["store"])
+    #     store = gs.run()
+    #     gs = GeneticStore(store_size, orders, store_shape)
 
     # print("Test Section:")
     # stores = [generate_indexed_store(*(1, 1)), generate_indexed_store(*(1, 1))]
