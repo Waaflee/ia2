@@ -46,62 +46,26 @@ class Backtraking():  # return solution o failure
     # elijo la variable mas restringida
 
     def seleccionar_variable_sin_asignar(self, variables, asignamiento, restricciones_precedencia):
-        aleatorio = []
-        for i in variables.keys():
-            aleatorio.append(i)
-        for i in range(0, len(restricciones_precedencia)):
-            aleatorio.append(restricciones_precedencia[i][0])
-        flag = False
-        while flag == False:
-            var = random.choice(aleatorio)
-            if var not in asignamiento:
-                flag = True
-        return var
+        # aleatorio = []
+        # for i in variables.keys():
+        #     aleatorio.append(i)
+        # for i in range(0, len(restricciones_precedencia)):
+        #     aleatorio.append(restricciones_precedencia[i][0])
+        # flag = False
+        # while flag == False:
+        #     var = random.choice(aleatorio)
+        #     if var not in asignamiento:
+        #         flag = True
+        # return var
 
-        # repetitions = []
-        # restrictions = restricciones_precedencia.items()
-        # restrictions = [i for i in restrictions if i[0] not in asignamiento]
-        # for i in restrictions:
-        #     repetitions.append(restrictions[i[0]][0])
-        # count = Counter(repetitions).items()
-        # count = sorted(count, key=lambda x: x[1])
-        # return count[1][0]
-
-        # Esto era para elegir el más restringido pero se me fue de las manos así que me quedé que elija el más probable
-        """t1=0
-        t2=0
-        t3=0
-        t4=0
-        t=[]
-        #asignamiento.append("T4")
-        for i in range (0,len(restricciones_precedencia)):
-            for j in variables.keys():
-                if restricciones_precedencia[i][0] not in asignamiento:
-                    if restricciones_precedencia[i][0] == j:
-                        if j=="T1":
-                            t1=t1+1
-                        if j=="T2":
-                            t2=t2+1
-                        if j=="T3":
-                            t3=t3+1
-                        if j=="T4":
-                            t4=t4+1
-        t.insert(0,t1)
-        t.insert(1,t2)
-        t.insert(2,t3)
-        t.insert(3,t4)
-        for i in range(0, len(t)-1):
-            if t[i+1] < t[i]:
-                numero_clave = i
-        print(t.index(numero_clave))
-        #for i in range(1, len(t)):
-        #    if
-        #asignamiento.append()
-        for i in variables.keys():
-            if i == restricciones_precedencia[t.index(numero_clave)][0]:
-                var=i
-        print(var)
-        """
+        r = restricciones_precedencia
+        a = [i[1][0] for i in r.items()]
+        count = Counter(a).items()
+        count = sorted(count, key=lambda x: x[1])
+        count = [i[0] for i in count if i[0] not in asignamiento]
+        count = count + [i[0] for i in variables.items() if i[0]
+                         not in count and i[0] not in asignamiento]
+        return count[0]
 
     def consistente(self, variables, var, i, asignamiento, restricciones_precedencia, restricciones_recursos, tiempo_limite):
         tiempo = i
@@ -115,13 +79,6 @@ class Backtraking():  # return solution o failure
             if var == restricciones_precedencia[rp][1]:
                 if restricciones_precedencia[rp][0] not in asignamiento:
                     return False
-
-        # for r in variables.keys():
-        #    if var == restricciones_recursos[r]:
-        # for m in range(0, len(restricciones_recursos)):
-        #    if restricciones_recursos[var][m].desocupada==False:
-        #        return False
-
         return True
 
 
