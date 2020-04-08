@@ -4,5 +4,6 @@
         "Astar",
         "childs",
         "itertools"
-    ]
+    ],
+    "python.linting.enabled": true
 }
