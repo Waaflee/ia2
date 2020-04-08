@@ -1,5 +1,4 @@
 from utils.orders import *
-from multiprocessing import Pool
 from algorithms.simulated_annealing import ListOrderer, compute_distance
 from utils.store_generator import generate_indexed_store
 from functools import reduce
@@ -7,8 +6,6 @@ import random
 
 import numpy as np
 import itertools
-
-cores = 4
 
 
 class GeneticStore():
@@ -47,14 +44,15 @@ class GeneticStore():
 
     def evolve(self):
         next_gen = self.match(self.fitness())
-        with multiprocessing.Pool(processes=cores) as pool:
-            offspring = pool.map(self.mutate, next_gen)
-
+        for i in next_gen:
+            if random.random() > 0.2:
+                mutations = random.randint(1, sum(self.size))
+                self.mutate(i, mutations)
         return next_gen.copy()
 
     def fitness(self):
         stores = []
-        with multiprocessing.Pool(processes=cores) as pool:
+        with multiprocessing.Pool(processes=4) as pool:
             scores = pool.map(self.score, self.population)
         for score, i in zip(scores, self.population):
             stores.append({"score": score, "store": i})
@@ -68,14 +66,10 @@ class GeneticStore():
     def match(self, stores):
         weights = [i["score"] for i in stores]
         new_population = []
-        pairs = []
         for i in range(int(len(self.population)/2)):
-            pairs.append(random.choices([i["store"]
-                                         for i in stores], weights=weights, k=2))
-        with multiprocessing.Pool(processes=cores) as pool:
-            offspring = pool.map(self.crossover, pairs)
-        for i in offspring:
-            new_population += i
+            pair = random.choices([i["store"]
+                                   for i in stores], weights=weights, k=2)
+            new_population += self.crossover(pair)
         return new_population
 
     def crossover(self, stores):
@@ -106,30 +100,31 @@ class GeneticStore():
         b = np.reshape(b, self.shape)
         return [a, b]
 
-    def mutate(self, store):
-        if random.random() > 0.2:
-            mutations = random.randint(1, sum(self.size))
-            for i in range(mutations):
-                item_a = random.randint(1, store[2::].max())
-                item_b = random.randint(1, store[2::].max())
-                point_a = np.where(store == item_a)
-                point_b = np.where(store == item_b)
-                store[point_a] = item_b
-                store[point_b] = item_a
+    def mutate(self, store, mutations=1):
+        for i in range(mutations):
+            item_a = random.randint(1, store[2::].max())
+            item_b = random.randint(1, store[2::].max())
+            point_a = np.where(store == item_a)
+            point_b = np.where(store == item_b)
+            store[point_a] = item_b
+            store[point_b] = item_a
 
     def score(self, store):
-        return sum([compute_distance(order_to_points(i, store)) for i in self.orders])
+        orders = self.orders.copy()
+        # orders = sort_orders(orders, store)
+        orders = [sort_order(i, store) for i in orders]
+        return sum([compute_distance(order_to_points(i, store)) for i in orders])
 
     def pop_score(self):
         return sum([self.score(i) for i in self.population])
 
 
-def main():
+if __name__ == "__main__":
     print("----------------------------------------------------")
     print("----------------------------------------------------")
     random.seed()
-    o_cant = 5
-    o_len = 8
+    o_cant = 4
+    o_len = 4
     store_size = (1, 1)  # Not to big or memory will collapse!
     store_max = store_size[0] * store_size[1] * 8
     store_shape = (store_size[0] * 6, store_size[1]*4)
@@ -150,20 +145,19 @@ def main():
     print("Initial Cost: ", gs.score(store))
 
     store = gs.run()
-    print("First optimization: ", store["cost"])
+    # print("First optimization: ", store["cost"])
     # print("Store:", store["store"])
-
-    acc = 0
-    while acc < 10:
-
-        acc += 1
-        store = gs.run()
-        orders = sort_orders(orders, store["store"])
-        gs = GeneticStore(store_size, orders, store_shape)
-
     print("Optimized Store: ")
     print("cost: ", store["cost"])
     print(store["store"])
+
+    # acc = 0
+    # while acc < 25:
+
+    #     acc += 1
+    #     orders = sort_orders(orders, store["store"])
+    #     store = gs.run()
+    #     gs = GeneticStore(store_size, orders, store_shape)
 
     # print("Test Section:")
     # stores = [generate_indexed_store(*(1, 1)), generate_indexed_store(*(1, 1))]
@@ -185,7 +179,3 @@ def main():
     # gs.mutate(stores[0], 1)
     # gs.mutate(stores[1], 1)
     # print(stores[0].flatten(), stores[1].flatten(), sep="\n")
-
-
-if __name__ == "__main__":
-    main()
