@@ -61,7 +61,7 @@ class Backtraking():  # return solution o failure
         r = restricciones_precedencia
         a = [i[1][0] for i in r.items()]
         count = Counter(a).items()
-        count = sorted(count, key=lambda x: x[1])
+        count = sorted(count, key=lambda x: x[1], reverse=True)
         count = [i[0] for i in count if i[0] not in asignamiento]
         count = count + [i[0] for i in variables.items() if i[0]
                          not in count and i[0] not in asignamiento]
